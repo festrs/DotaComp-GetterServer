@@ -40,7 +40,9 @@ var proccessAll = function(){
         } 
       });
       LiveGamesModel.collection.insertMany(games,function (err,r){
-        if(err) console.log("Error inserting liveGames err = "+ err);
+        if(err) {
+          console.log("Error inserting liveGames err = "+ err);
+        }
       }); 
     }
   });
@@ -69,19 +71,27 @@ var proccessAll = function(){
         var savedBody = JSON.parse(body);
 
         UpComingGamesModel.remove({},function(err){
-          if(err) console.log("Error removing upcoming err = "+ err);
+          if(err) { 
+            console.log("Error removing upcoming err = "+ err);
+          }
         });
 
         EndedGamesModel.remove({},function(err){
-          if(err) console.log("Error removing endedgames err = "+ err);
+          if(err) {
+            console.log("Error removing endedgames err = "+ err);
+          }
         });
 
         UpComingGamesModel.collection.insertMany(savedBody["eventSoon"],function (err,r){
-          if(err) console.log("Error inserting upcoming err = "+ err);
+          if(err) { 
+            console.log("Error inserting upcoming err = "+ err);
+          }
         });
 
         EndedGamesModel.collection.insertMany(savedBody["eventDone"],function (err,r){
-          if(err) console.log("Error inserting endedgames err = "+ err);
+          if(err) {
+            console.log("Error inserting endedgames err = "+ err);
+          }
         });
 
       }

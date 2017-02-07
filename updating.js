@@ -1,7 +1,7 @@
 var mongoose = require("mongoose");
 var async   = require("async");
 var request = require("request");
-var Q = require("q");
+var q = require("q");
 // Models
 var LiveGamesModel = mongoose.model("LiveGames");
 var UpComingGamesModel = mongoose.model("UpComingGames");
@@ -10,7 +10,7 @@ var TournamentsModel = mongoose.model("Tournaments");
 var Teams = mongoose.model("Teams");
 
 function requestTeamLogoUrl(ugcid, API_KEY) {
-  return Q.Promise(function(resolve, reject, notify) {
+  return q.Promise(function(resolve, reject, notify) {
     request("http://api.steampowered.com/ISteamRemoteStorage/GetUGCFileDetails/v1?ugcid="+ugcid+"&appid=570&key="+API_KEY, function (error, response, body) {
       if (error) {
         reject(error);
@@ -38,7 +38,7 @@ function createNewTeam(ID, team, API_KEY){
   newTeam.url = team["url"];
   
   requestTeamLogoUrl(team["logo"], API_KEY).then(function (value) {
-    newTeam.logo_url = value;
+    newTeam.logoUrl = value;
     newTeam.save(function (err, team) {
       if (err) {
         console.log(err);
@@ -47,14 +47,18 @@ function createNewTeam(ID, team, API_KEY){
       }
     });
   }).catch(function (error) {
-      if (error) console.log(error);
+      if (error) {
+        console.log(error);
+      }
   }).done();
 }
 
 
 function getTeamInfo(teamID, API_KEY){
   request("https://api.steampowered.com/IDOTA2Match_570/GetTeamInfoByTeamID/v001/?key="+API_KEY+"&start_at_team_id="+teamID+"&teams_requested=1", function (error, response, body) {
-    if (error) console.log(error);
+    if (error) {
+      console.log(error);
+    }
     if (!error) {
       var savedBody = JSON.parse(body);
       var result = savedBody["result"];
@@ -74,7 +78,7 @@ function findTeamByID(ID, API_KEY){
     } else {
       if(team && team.logo_url === null){
         requestTeamLogoUrl(team.logo, API_KEY).then(function (url) {
-          team.logo_url = url;
+          team.logoUrl = url;
           team.save(function (err, newTeam) {
             if (err) {
               console.log(err);
@@ -109,7 +113,9 @@ module.exports.updateUrls = function(API_KEY) {
           }
           callback();
         }, function(err) {
-            if (err) return console.log(err);
+            if (err) {
+              return console.log(err);
+            }
         });
     }
   });
