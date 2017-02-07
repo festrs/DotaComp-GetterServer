@@ -1,1 +1,1 @@
-# DotaComp-GetterServer
+# DotaComp-Worker
