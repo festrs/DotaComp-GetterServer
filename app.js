@@ -28,30 +28,32 @@ var proccessAll = function(){
 
   console.time("LiveGames");
 
-  request("https://api.steampowered.com/IDOTA2Match_570/GetLiveLeagueGames/v0001/?key="+API_KEY, function (error, response, body) {
-    if (!error && response.statusCode === 200) {
-      var savedBody = JSON.parse(body);
-      var resultJson = savedBody["result"]; 
-      var games = resultJson["games"];
-      
-      LiveGamesModel.remove({},function(err) {
-        if(err) { 
-          console.log("Error removing liveGames err = "+ err); 
-        } 
-      });
-      LiveGamesModel.collection.insertMany(games,function (err,r){
-        if(err) {
-          console.log("Error inserting liveGames err = "+ err);
-        }
-      }); 
-    }
-  });
+  setTimeout(function(){
+    request("https://api.steampowered.com/IDOTA2Match_570/GetLiveLeagueGames/v0001/?key="+API_KEY, function (error, response, body) {
+      if (!error && response.statusCode === 200) {
+        var savedBody = JSON.parse(body);
+        var resultJson = savedBody["result"]; 
+        var games = resultJson["games"];
+        
+        LiveGamesModel.remove({},function(err) {
+          if(err) { 
+            console.log("Error removing liveGames err = "+ err); 
+          } 
+        });
+        LiveGamesModel.collection.insertMany(games,function (err,r){
+          if(err) {
+            console.log("Error inserting liveGames err = "+ err);
+          }
+        }); 
+      }
+    });
+  },500);
 
   console.timeEnd("LiveGames");
 
 
   console.time("Games updating");
-  //30 minutes
+  // 30 minutos
   if (RefreshTeams >= 30*2) {
     updating.updateUrls(API_KEY);    
     RefreshTeams = 0;
@@ -104,20 +106,22 @@ var proccessAll = function(){
   console.time("Tournament");
   // 24 hours
   if(TournamentTime >= 24*60*2){
-    request("https://api.steampowered.com/IDOTA2Match_570/GetLeagueListing/v0001/?key="+API_KEY, function (error, response, body) {
-      if (!error && response.statusCode === 200) {
-        var savedBody = JSON.parse(body);
-        var resultJson = savedBody["result"];
+    setTimeout(function(){
+      request("https://api.steampowered.com/IDOTA2Match_570/GetLeagueListing/v0001/?key="+API_KEY, function (error, response, body) {
+        if (!error && response.statusCode === 200) {
+          var savedBody = JSON.parse(body);
+          var resultJson = savedBody["result"];
 
-        TournamentsModel.remove({},function(err){
-          if(err) console.log("Error removing tournament err = "+ err);
-        });
+          TournamentsModel.remove({},function(err){
+            if(err) console.log("Error removing tournament err = "+ err);
+          });
 
-        TournamentsModel.collection.insertMany(resultJson["leagues"],function (err,r){
-          if(err) console.log("Error inserting tournament err = "+ err);
-        });    
-      }
-    });
+          TournamentsModel.collection.insertMany(resultJson["leagues"],function (err,r){
+            if(err) console.log("Error inserting tournament err = "+ err);
+          });    
+        }
+      });
+    },500);
     TournamentTime =0;
   }
 
