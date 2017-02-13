@@ -46,7 +46,7 @@ function updateUpComingAndEndedGames(){
 
         EndedGamesModel.remove({},function(err){
             if(err) {
-              consol.log("Error removing endedgames err = "+ err);
+              console.log("Error removing endedgames err = "+ err);
             }
           }).then(function(){
             if(endedGames.length > 0){
