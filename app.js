@@ -40,12 +40,15 @@ var proccessAll = function(){
           if(err) { 
             console.log("Error removing liveGames err = "+ err); 
           } 
-        });
-        LiveGamesModel.collection.insertMany(games,function (err,r){
-          if(err) {
-            console.log("Error inserting liveGames err = "+ err);
+        }).then(function(){
+          if(games.length > 0){
+            LiveGamesModel.collection.insertMany(games,function (err,r){
+              if(err) {
+                console.log("Error inserting liveGames err = "+ err);
+              }
+            });             
           }
-        }); 
+        });
       }
     });
   },500);
@@ -90,17 +93,20 @@ function updateUpComingAndEndedGames(){
       } 
       if (!error && response.statusCode === 200) {
         var savedBody = JSON.parse(body);
-
+        var upComingGames = savedBody["eventSoon"];
+        var endedGames = savedBody["eventDone"];
         UpComingGamesModel.remove({},function(err){
           if(err) { 
             consol.log("Error removing upcoming err = "+ err);
           }
         }).then(function(){
-            UpComingGamesModel.collection.insertMany(savedBody["eventSoon"],function (err,r){
+          if(upComingGames.length > 0){
+            UpComingGamesModel.collection.insertMany(upComingGames,function (err,r){
               if(err) { 
                 consol.log("Error inserting upcoming err = "+ err);
               }
             });
+          }
         });
 
         EndedGamesModel.remove({},function(err){
@@ -108,11 +114,13 @@ function updateUpComingAndEndedGames(){
               consol.log("Error removing endedgames err = "+ err);
             }
           }).then(function(){
-            EndedGamesModel.collection.insertMany(savedBody["eventDone"],function (err,r){
-              if(err) {
-                consol.log("Error inserting endedgames err = "+ err);
-              }
-            });            
+            if(endedGames.length > 0){
+              EndedGamesModel.collection.insertMany(endedGames,function (err,r){
+                if(err) {
+                  consol.log("Error inserting endedgames err = "+ err);
+                }
+              });               
+            }
           });
       }
     });
