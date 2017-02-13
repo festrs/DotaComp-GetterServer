@@ -32,13 +32,13 @@ function updateUpComingAndEndedGames(){
         var endedGames = savedBody["eventDone"];
         UpComingGamesModel.remove({},function(err){
           if(err) { 
-            consol.log("Error removing upcoming err = "+ err);
+            console.log("Error removing upcoming err = "+ err);
           }
         }).then(function(){
           if(upComingGames.length > 0){
             UpComingGamesModel.collection.insertMany(upComingGames,function (err,r){
               if(err) { 
-                consol.log("Error inserting upcoming err = "+ err);
+                console.log("Error inserting upcoming err = "+ err);
               }
             });
           }
@@ -52,7 +52,7 @@ function updateUpComingAndEndedGames(){
             if(endedGames.length > 0){
               EndedGamesModel.collection.insertMany(endedGames,function (err,r){
                 if(err) {
-                  consol.log("Error inserting endedgames err = "+ err);
+                  console.log("Error inserting endedgames err = "+ err);
                 }
               });               
             }

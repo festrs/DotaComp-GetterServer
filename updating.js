@@ -119,7 +119,7 @@ module.exports.updateUrls = function(API_KEY) {
       });
       return console.log("Teams Updated");
     }
-  });
+  })
 }
 
 
