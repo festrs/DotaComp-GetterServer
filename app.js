@@ -74,10 +74,10 @@ var proccessAll = function(){
 
   console.time("Tournament");
   // 24 hours
-  //if(TournamentTime >= 24*60*2){
+  if(TournamentTime >= 24*60*2){
     updateTournaments();
     TournamentTime =0;
-  //}
+  }
 
   console.timeEnd("Tournament");
 
@@ -130,14 +130,14 @@ function updateTournaments(){
             if(err) {
               reject(err);
             }
+          }).then(function(){
+            TournamentsModel.collection.insertMany(resultJson["leagues"],function (err,r){
+              if(err) {
+                reject(err);
+              }
+              resolve("Torunaments updated");
+            }); 
           });
-
-          TournamentsModel.collection.insertMany(resultJson["leagues"],function (err,r){
-            if(err) {
-              reject(err);
-            }
-            resolve("Torunaments updated");
-          });    
         }
       });
     },500);
