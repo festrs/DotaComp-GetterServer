@@ -21,71 +21,6 @@ var UpComingGamesModel = mongoose.model("UpComingGames");
 var EndedGamesModel = mongoose.model("EndedGames");
 var TournamentsModel = mongoose.model("Tournaments");
 
-var proccessAll = function(){
-
-  console.log(TournamentTime+" = Tournaments time");
-  console.log(UpcomingAndEndedGames+" = UpcomingAndEndedGames time");
-  console.log(RefreshTeams+" = RefreshTeams time");
-
-  console.time("LiveGames");
-
-  setTimeout(function(){
-    request("https://api.steampowered.com/IDOTA2Match_570/GetLiveLeagueGames/v0001/?key="+API_KEY, function (error, response, body) {
-      if (!error && response.statusCode === 200) {
-        var savedBody = JSON.parse(body);
-        var resultJson = savedBody["result"]; 
-        var games = resultJson["games"];
-        
-        LiveGamesModel.remove({},function(err) {
-          if(err) { 
-            console.log("Error removing liveGames err = "+ err); 
-          } 
-        }).then(function(){
-          if(games.length > 0){
-            LiveGamesModel.collection.insertMany(games,function (err,r){
-              if(err) {
-                console.log("Error inserting liveGames err = "+ err);
-              }
-            });             
-          }
-        });
-      }
-    });
-  },500);
-
-  console.timeEnd("LiveGames");
-
-
-  console.time("Games updating");
-  // 30 minutos
-  if (RefreshTeams >= 30*2) {
-    updating.updateUrls(API_KEY);    
-    RefreshTeams = 0;
-  }
-  
-  console.timeEnd("Games updating");
-
-
-  console.time("UpcomingAndEndedGames");
-  // 5 minutes
-  if(UpcomingAndEndedGames >= 5*2){
-    updateUpComingAndEndedGames();
-    UpcomingAndEndedGames = 0;
-  }
-
-  console.timeEnd("UpcomingAndEndedGames");
-
-  console.time("Tournament");
-  // 24 hours
-  if(TournamentTime >= 24*60*2){
-    updateTournaments();
-    TournamentTime =0;
-  }
-
-  console.timeEnd("Tournament");
-
-};
-
 function updateUpComingAndEndedGames(){
     request("http://watcherd2phpserver.herokuapp.com/api/gg/matches/v120/index.php",setTimeout(function() {}, 50),function (error, response, body) {
       if (error){
@@ -151,6 +86,71 @@ function updateTournaments(){
     },500);
   });
 }
+
+var proccessAll = function(){
+
+  console.log(TournamentTime+" = Tournaments time");
+  console.log(UpcomingAndEndedGames+" = UpcomingAndEndedGames time");
+  console.log(RefreshTeams+" = RefreshTeams time");
+
+  console.time("LiveGames");
+
+  setTimeout(function(){
+    request("https://api.steampowered.com/IDOTA2Match_570/GetLiveLeagueGames/v0001/?key="+API_KEY, function (error, response, body) {
+      if (!error && response.statusCode === 200) {
+        var savedBody = JSON.parse(body);
+        var resultJson = savedBody["result"]; 
+        var games = resultJson["games"];
+        
+        LiveGamesModel.remove({},function(err) {
+          if(err) { 
+            console.log("Error removing liveGames err = "+ err); 
+          } 
+        }).then(function(){
+          if(games.length > 0){
+            LiveGamesModel.collection.insertMany(games,function (err,r){
+              if(err) {
+                console.log("Error inserting liveGames err = "+ err);
+              }
+            });             
+          }
+        });
+      }
+    });
+  },500);
+
+  console.timeEnd("LiveGames");
+
+
+  console.time("Games updating");
+  // 30 minutos
+  if (RefreshTeams >= 30*2) {
+    updating.updateUrls(API_KEY);    
+    RefreshTeams = 0;
+  }
+  
+  console.timeEnd("Games updating");
+
+
+  console.time("UpcomingAndEndedGames");
+  // 5 minutes
+  if(UpcomingAndEndedGames >= 5*2){
+    updateUpComingAndEndedGames();
+    UpcomingAndEndedGames = 0;
+  }
+
+  console.timeEnd("UpcomingAndEndedGames");
+
+  console.time("Tournament");
+  // 24 hours
+  if(TournamentTime >= 24*60*2){
+    updateTournaments();
+    TournamentTime =0;
+  }
+
+  console.timeEnd("Tournament");
+
+};
 
 var rule = new schedule.RecurrenceRule();
 rule.second = [0, 30];
