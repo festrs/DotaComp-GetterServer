@@ -7,7 +7,9 @@ var dbURI = "mongodb://localhost/dotacomp";
 if (process.env.MONGODB_URI != null) {
   dbURI = process.env.MONGODB_URI;
 }
+
 mongoose.Promise = require("q").Promise;
+
 var connection = mongoose.connect(dbURI);
 // CONNECTION EVENTS
 mongoose.connection.on("connected", function() {

@@ -4,6 +4,7 @@ var schedule = require("node-schedule");
 var request = require("request");
 var async   = require("async");
 var updating = require("./updating");
+var q = require("q");
 
 var API_KEY = "";
 if(process.env.API_KEY != null){
@@ -22,7 +23,7 @@ var TournamentsModel = mongoose.model("Tournaments");
 
 var proccessAll = function(){
 
-  console.log(TournamentTime+" = Tournament time");
+  console.log(TournamentTime+" = Tournaments time");
   console.log(UpcomingAndEndedGames+" = UpcomingAndEndedGames time");
   console.log(RefreshTeams+" = RefreshTeams time");
 
@@ -65,6 +66,24 @@ var proccessAll = function(){
   console.time("UpcomingAndEndedGames");
   // 5 minutes
   if(UpcomingAndEndedGames >= 5*2){
+    updateUpComingAndEndedGames();
+    UpcomingAndEndedGames = 0;
+  }
+
+  console.timeEnd("UpcomingAndEndedGames");
+
+  console.time("Tournament");
+  // 24 hours
+  //if(TournamentTime >= 24*60*2){
+    updateTournaments();
+    TournamentTime =0;
+  //}
+
+  console.timeEnd("Tournament");
+
+};
+
+function updateUpComingAndEndedGames(){
     request("http://watcherd2phpserver.herokuapp.com/api/gg/matches/v120/index.php",setTimeout(function() {}, 50),function (error, response, body) {
       if (error){
         console.log("Error, Upcoming" + error);
@@ -74,38 +93,33 @@ var proccessAll = function(){
 
         UpComingGamesModel.remove({},function(err){
           if(err) { 
-            console.log("Error removing upcoming err = "+ err);
+            consol.log("Error removing upcoming err = "+ err);
           }
+        }).then(function(){
+            UpComingGamesModel.collection.insertMany(savedBody["eventSoon"],function (err,r){
+              if(err) { 
+                consol.log("Error inserting upcoming err = "+ err);
+              }
+            });
         });
 
         EndedGamesModel.remove({},function(err){
-          if(err) {
-            console.log("Error removing endedgames err = "+ err);
-          }
-        });
-
-        UpComingGamesModel.collection.insertMany(savedBody["eventSoon"],function (err,r){
-          if(err) { 
-            console.log("Error inserting upcoming err = "+ err);
-          }
-        });
-
-        EndedGamesModel.collection.insertMany(savedBody["eventDone"],function (err,r){
-          if(err) {
-            console.log("Error inserting endedgames err = "+ err);
-          }
-        });
-
+            if(err) {
+              consol.log("Error removing endedgames err = "+ err);
+            }
+          }).then(function(){
+            EndedGamesModel.collection.insertMany(savedBody["eventDone"],function (err,r){
+              if(err) {
+                consol.log("Error inserting endedgames err = "+ err);
+              }
+            });            
+          });
       }
     });
-    UpcomingAndEndedGames = 0;
-  }
+}
 
-  console.timeEnd("UpcomingAndEndedGames");
-
-  console.time("Tournament");
-  // 24 hours
-  if(TournamentTime >= 24*60*2){
+function updateTournaments(){
+  return q.Promise(function(resolve, reject, notify) {
     setTimeout(function(){
       request("https://api.steampowered.com/IDOTA2Match_570/GetLeagueListing/v0001/?key="+API_KEY, function (error, response, body) {
         if (!error && response.statusCode === 200) {
@@ -113,21 +127,22 @@ var proccessAll = function(){
           var resultJson = savedBody["result"];
 
           TournamentsModel.remove({},function(err){
-            if(err) console.log("Error removing tournament err = "+ err);
+            if(err) {
+              reject(err);
+            }
           });
 
           TournamentsModel.collection.insertMany(resultJson["leagues"],function (err,r){
-            if(err) console.log("Error inserting tournament err = "+ err);
+            if(err) {
+              reject(err);
+            }
+            resolve("Torunaments updated");
           });    
         }
       });
     },500);
-    TournamentTime =0;
-  }
-
-  console.timeEnd("Tournament");
-
-};
+  });
+}
 
 var rule = new schedule.RecurrenceRule();
 rule.second = [0, 30];
