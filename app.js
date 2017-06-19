@@ -14,7 +14,7 @@ if(process.env.API_KEY != null){
 var TournamentTime = 0;
 var UpcomingAndEndedGames = 0;
 var RefreshTeams = 0;
-
+var MaintainBotAlive = 0;
 // Models
 var LiveGamesModel = mongoose.model("LiveGames");
 var UpComingGamesModel = mongoose.model("UpComingGames");
@@ -59,6 +59,14 @@ function updateUpComingAndEndedGames(){
           });
       }
     });
+}
+
+function maintainBootAlive(){
+  request("https://festrs-lendingbot.herokuapp.com",setTimeout(function() {}, 50),function (error, response, body) {
+    if (error){
+      console.log("Error, MantainBootAlive " + error);
+    }
+  });
 }
 
 function updateTournaments(){
@@ -150,6 +158,15 @@ var proccessAll = function(){
 
   console.timeEnd("Tournament");
 
+  console.time("MaintainBotAlive");
+  // 5 minutes
+  if(MaintainBotAlive >= 29*2){
+    maintainBootAlive();
+    MaintainBotAlive = 0;
+  }
+
+  console.timeEnd("MaintainBotAlive");
+
 };
 
 var rule = new schedule.RecurrenceRule();
@@ -160,6 +177,7 @@ schedule.scheduleJob(rule, function() {
   TournamentTime++;
   UpcomingAndEndedGames++;
   RefreshTeams++;
+  MaintainBotAlive++;
 });
 
 
