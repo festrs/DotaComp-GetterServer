@@ -161,7 +161,7 @@ var proccessAll = function(){
   console.time("MaintainBotAlive");
   // 5 minutes
   if(MaintainBotAlive >= 29*2){
-    maintainBootAlive();
+    //maintainBootAlive();
     MaintainBotAlive = 0;
   }
 
